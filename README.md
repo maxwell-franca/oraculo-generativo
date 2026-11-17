@@ -1,95 +1,118 @@
-# 🔮 Oráculo Generativo
+# 🔮 Oráculo Generativo (ESP32)
 
-**Servidor web local em ESP32 que gera frases por gramática de regras e roda o Jogo da Vida no display OLED.**
+Servidor web local no **ESP32** que gera frases poéticas por **gramática de regras** e roda o **Jogo da Vida de Conway** em um display OLED.
+
+**100% local:** sem internet, sem API e sem custo.
 
 ![ESP32](https://img.shields.io/badge/ESP32-E7352C?style=for-the-badge&logo=espressif&logoColor=white)
 ![Arduino](https://img.shields.io/badge/Arduino-00878F?style=for-the-badge&logo=arduino&logoColor=white)
 ![C++](https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
-![Licença](https://img.shields.io/badge/Licen%C3%A7a-MIT-green?style=for-the-badge)
 
 ---
 
-## 🧠 O que é
+## ✨ O que faz
 
-Um projeto embarcado que une dois conceitos de **geração procedural** em um único microcontrolador:
+- Sobe um servidor web no ESP32, acessível pelo celular ou PC na mesma rede.
+- **Nova frase:** gera uma frase poética por gramática (com concordância de gênero) e mostra no OLED e na página.
+- **Arte:** roda o Jogo da Vida (autômato celular) no display, com mundo toroidal e reinício automático quando a população estabiliza.
+- Se não conectar no seu Wi-Fi, o ESP32 cria a própria rede (modo AP) e mostra o endereço no display.
 
-- 📜 **Gramática generativa:** o ESP32 monta frases (as "profecias" do oráculo) combinando regras e listas de palavras, sem IA e sem internet.
-- 🧬 **Jogo da Vida de Conway:** autômato celular rodando em tempo real no display OLED.
-- 🌐 **Servidor web local:** acesse pelo navegador, na mesma rede Wi-Fi, para pedir uma nova frase.
+Exemplos de frases geradas:
 
----
-
-## ✨ Funcionalidades
-
-- Geração de frases por gramática de regras
-- Jogo da Vida animado no OLED
-- Servidor web embutido no ESP32
-- Credenciais Wi-Fi separadas do código (`secrets.h`, fora do Git)
+> A lua antiga abraça o rio.
+> Se a sombra dorme, o vento espera.
+> Existe um mapa esquecido dentro de cada nuvem.
 
 ---
 
-## 🔧 Hardware
+## 🧰 Hardware
 
-| Componente | Observação |
+| Item | Detalhe |
 | --- | --- |
-| ESP32 | Placa de desenvolvimento |
-| Display OLED | I2C (ajuste o modelo e os pinos conforme o seu) |
-| Cabo USB | Para gravar e alimentar |
+| Placa | ESP32-WROOM |
+| Display | OLED 0,96" SSD1306 (I2C, 128x64) |
+| Jumpers | 4 fios |
+
+### Ligação
+
+| OLED | ESP32 |
+| --- | --- |
+| VCC | 3V3 |
+| GND | GND |
+| SDA | GPIO 21 |
+| SCL | GPIO 22 |
 
 ---
 
-## 📁 Estrutura
+## 📚 Bibliotecas
 
-```
-oraculo-generativo/
-├── oraculo_generativo/
-│   ├── oraculo_generativo.ino   # código principal
-│   └── secrets.example.h        # modelo das credenciais
-├── COMMITS.md                   # padrão de commits do projeto
-├── LICENSE
-└── README.md
-```
+Instale pelo Gerenciador de Bibliotecas da Arduino IDE:
+
+- **Adafruit GFX Library**
+- **Adafruit SSD1306**
+
+`WiFi.h` e `WebServer.h` já vêm com o pacote **esp32** da Espressif.
 
 ---
 
 ## 🚀 Como usar
 
-1. **Clone o repositório**
+1. Clone o repositório:
+
+   ```bash
+   git clone https://github.com/maxwell-franca/esp32-oraculo-generativo.git
    ```
-   git clone https://github.com/maxwell-franca/oraculo-generativo.git
+
+2. Na pasta `oraculo_generativo/`, copie `secrets.example.h` para `secrets.h` e preencha o nome e a senha do seu Wi-Fi:
+
+   ```bash
+   cp oraculo_generativo/secrets.example.h oraculo_generativo/secrets.h
    ```
-2. **Crie o seu `secrets.h`** a partir do modelo, dentro da pasta `oraculo_generativo`:
-   ```
-   copy oraculo_generativo\secrets.example.h oraculo_generativo\secrets.h
-   ```
-   Abra o `secrets.h` e preencha o nome e a senha do seu Wi-Fi. Esse arquivo está no `.gitignore` e **não vai para o GitHub**.
-3. **Abra o `oraculo_generativo.ino`** na Arduino IDE, instale as bibliotecas do display OLED e selecione a sua placa ESP32.
-4. **Grave no ESP32** e abra o Monitor Serial para ver o endereço IP.
-5. **Acesse o IP no navegador** (na mesma rede) e peça uma nova frase.
+
+3. Abra `oraculo_generativo/oraculo_generativo.ino` na Arduino IDE.
+4. Selecione a placa **ESP32 Dev Module** e a porta correta.
+5. Envie o código para a placa.
+6. O display mostra o IP. Abra `http://<ip>` no navegador do celular ou PC.
+
+> ⚠️ O arquivo `secrets.h` está no `.gitignore`. Nunca publique suas credenciais.
 
 ---
 
-## 📝 Padrão de commits
+## 🧠 Como funciona
 
-Este projeto usa commits com gitmoji. Os detalhes estão em [COMMITS.md](COMMITS.md).
+**Gramática generativa:** listas de substantivos (com gênero), adjetivos (masculino e feminino) e verbos (transitivos e intransitivos) são combinadas em 6 modelos de frase. Os artigos e adjetivos concordam com o gênero do substantivo, e o mesmo substantivo não se repete na frase.
+
+**Jogo da Vida:** regras de Conway em uma grade de 128x64, com bordas conectadas. Uma célula viva com 2 ou 3 vizinhas sobrevive, e uma morta com exatamente 3 vizinhas nasce. A simulação reinicia sozinha quando a população para de mudar.
+
+**Display:** a fonte padrão do OLED não tem acentos, então o texto é convertido para ASCII no display. A página web mostra a frase completa, com acentos.
+
+---
+
+## 🗺️ Estrutura
+
+```
+esp32-oraculo-generativo/
+├── oraculo_generativo/
+│   ├── oraculo_generativo.ino
+│   └── secrets.example.h
+├── .gitignore
+├── LICENSE
+├── COMMITS.md
+└── README.md
+```
+
+---
+
+## 🤝 Contribuindo
+
+Este projeto usa o padrão de commits descrito em [COMMITS.md](COMMITS.md).
 
 ---
 
 ## 📄 Licença
 
-Distribuído sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE).
+MIT. Veja [LICENSE](LICENSE).
 
 ---
 
-## 👤 Autor
-
-**Maxwell França** · Contador & Administrador | IA, Automação e Sistemas Embarcados  
-🇧🇷 São Luís – MA, Brasil
-
-<a href="https://github.com/maxwell-franca">
-  <img src="https://img.shields.io/badge/GitHub-maxwell--franca-181717?style=for-the-badge&logo=github" />
-</a>
-
----
-
-⭐ Se gostou do projeto, deixe uma estrela no repositório
+Feito por **[Maxwell França](https://github.com/maxwell-franca)** · Contador & Administrador apaixonado por IA, automação e sistemas embarcados.
